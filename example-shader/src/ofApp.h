@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxHongoStudio.h"
+#include "ofxUI.h"
 
 class ofApp : public ofBaseApp{
     
@@ -12,6 +13,12 @@ class ofApp : public ofBaseApp{
     ofMatrix4x4 modelToWorld;
     ofMatrix4x4 worldToCamera;
     ofMatrix4x4 cameraToView;
+    
+    // UI
+    ofxUISuperCanvas *ui;
+    void guiEvent(ofxUIEventArgs &e);
+    ofxUIRadio *radio_shader;
+
 
 	public:
 		void setup();
