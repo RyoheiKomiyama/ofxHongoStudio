@@ -1,0 +1,3 @@
+ofxCv
+ofxHongoStudio
+ofxOpenCv
