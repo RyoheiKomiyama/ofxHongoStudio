@@ -1,5 +1,6 @@
 ofxCv
 ofxHongoStudio
+ofxObjLoader
 ofxOpenCv
 ofxUI
 ofxXmlSettings

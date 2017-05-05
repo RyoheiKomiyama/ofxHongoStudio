@@ -6,6 +6,7 @@
 class ofApp : public ofBaseApp{
     
     ofxHongoStudio::StaticCGScene staticCgScene;
+    
     ofEasyCam cam;
 
 	public:

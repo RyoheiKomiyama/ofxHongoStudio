@@ -164,29 +164,29 @@ namespace ofxHongoStudio
         }
         
         void draw() {
-            for (int i = 0; i < 3; i++) {
-                boxes[i].draw();
-            }
             for (int i=0; i<8; i++){
                 grasses[i].draw();
+            }
+            for (int i = 0; i < 3; i++) {
+                boxes[i].draw();
             }
         }
         
         void drawWireFrame() {
-            for (int i = 0; i < 3; i++) {
-                boxes[i].drawWireFrame();
-            }
             for (int i=0; i<8; i++){
                 grasses[i].drawWireFrame();
+            }
+            for (int i = 0; i < 3; i++) {
+                boxes[i].drawWireFrame();
             }
         }
         
         void drawBlackWireFrame() {
-            for (int i = 3; i < 6; i++) {
-                boxes[i].drawWireFrame();
-            }
             for (int i=8; i<16; i++){
                 grasses[i].drawWireFrame();
+            }
+            for (int i = 3; i < 6; i++) {
+                boxes[i].drawWireFrame();
             }
         }
         

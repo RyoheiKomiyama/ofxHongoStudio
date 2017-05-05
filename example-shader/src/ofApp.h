@@ -3,16 +3,20 @@
 #include "ofMain.h"
 #include "ofxHongoStudio.h"
 #include "ofxUI.h"
+#include "ofxObjLoader.h"
 
 class ofApp : public ofBaseApp{
     
     ofShader shader;
-    ofxHongoStudio::StaticCGScene staticCgScene;
     ofEasyCam cam;
     
     ofMatrix4x4 modelToWorld;
     ofMatrix4x4 worldToCamera;
     ofMatrix4x4 cameraToView;
+    
+    // SCENE
+    ofxHongoStudio::StaticCGScene staticCgScene; float alpha_staticCgScene;
+    ofMesh objMesh; float alpha_objMesh;
     
     // UI
     ofxUISuperCanvas *ui;
