@@ -1,0 +1,5 @@
+ofxCv
+ofxHongoStudio
+ofxOpenCv
+ofxUI
+ofxXmlSettings
