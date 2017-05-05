@@ -2,7 +2,8 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
-    shader.load("shader/simple");
+    shader_simple.load("shader/simple");
+    shader_height.load("shader/height.vert", "shader/simple.frag");
     
     ofx::ObjLoader::load("model/hongo_studio_bad03.obj", objMesh);
 
@@ -14,13 +15,11 @@ void ofApp::setup(){
     ui = new ofxUISuperCanvas("SETTINGS");
     ui->setWidgetFontSize(ofxUIWidgetFontType::OFX_UI_FONT_MEDIUM);
     ui->addSpacer();
-    ui->addButton("Sample Button", false);
-    ui->addSpacer();
     // ui shader
     ui->addLabel("SHADER", OFX_UI_FONT_MEDIUM);
     vector<string> vec_shader;
     vec_shader.push_back("simple");
-    vec_shader.push_back("time");
+    vec_shader.push_back("height");
     radio_shader = ui->addRadio("SHADER", vec_shader, OFX_UI_ORIENTATION_HORIZONTAL, OFX_UI_FONT_MEDIUM);
     radio_shader->activateToggle("simple");
     // ui slidebar
@@ -50,27 +49,25 @@ void ofApp::draw(){
     ofEnableAlphaBlending();
     ofEnableDepthTest();
 
-    if(radio_shader->getActiveName()=="simple"){
-        if(alpha_staticCgScene>0.01){
-            shader.begin();
-            shader.setUniformMatrix4f("modelToWorld", modelToWorld);
-            shader.setUniformMatrix4f("worldToCamera", worldToCamera);
-            shader.setUniformMatrix4f("cameraToView", cameraToView);
-            shader.setUniform1f("alpha", alpha_staticCgScene);
-            staticCgScene.draw();
-            staticCgScene.drawBlackWireFrame();
-            shader.end();
-        }
-        if(alpha_objMesh>0.01){
-            shader.begin();
-            shader.setUniformMatrix4f("modelToWorld", modelToWorld);
-            shader.setUniformMatrix4f("worldToCamera", worldToCamera);
-            shader.setUniformMatrix4f("cameraToView", cameraToView);
-            shader.setUniform1f("alpha", alpha_objMesh);
-            objMesh.draw();
-            shader.end();
-        }
+    ofShader* shader;
+    if(radio_shader->getActiveName()=="simple") shader = &shader_simple;
+    else if(radio_shader->getActiveName()=="height") shader = &shader_height;
+    
+    shader->begin();
+    shader->setUniformMatrix4f("modelToWorld", modelToWorld);
+    shader->setUniformMatrix4f("worldToCamera", worldToCamera);
+    shader->setUniformMatrix4f("cameraToView", cameraToView);
+    shader->setUniform1f("elapsedTime", ofGetElapsedTimef());
+    if(alpha_staticCgScene>0.01){
+        shader->setUniform1f("alpha", alpha_staticCgScene);
+        staticCgScene.draw();
+        staticCgScene.drawBlackWireFrame();
     }
+    if(alpha_objMesh>0.01){
+        shader->setUniform1f("alpha", alpha_objMesh);
+        objMesh.draw();
+    }
+    shader->end();
     
     ofDisableDepthTest();
     ofDisableAlphaBlending();
@@ -81,14 +78,6 @@ void ofApp::draw(){
 void ofApp::guiEvent(ofxUIEventArgs &e) {
     string name = e.widget->getName();
     int kind = e.widget->getKind();
-    
-    if (kind == OFX_UI_WIDGET_BUTTON)
-    {
-        ofxUIButton *button = (ofxUIButton *)e.widget;
-        if (name == "Sample Button" && button->getValue() == 0) { // button released
-            cout << "Sample Button" << endl;
-        }
-    }
 }
 
 //--------------------------------------------------------------

@@ -7,7 +7,7 @@
 
 class ofApp : public ofBaseApp{
     
-    ofShader shader;
+    ofShader shader_simple, shader_height;
     ofEasyCam cam;
     
     ofMatrix4x4 modelToWorld;
