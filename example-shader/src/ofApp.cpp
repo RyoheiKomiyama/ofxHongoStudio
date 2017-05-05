@@ -5,6 +5,7 @@ void ofApp::setup(){
     shader_simple.load("shader/simple");
     shader_height.load("shader/height.vert", "shader/simple.frag");
     shader_fake_noise.load("shader/fake_noise.vert", "shader/simple.frag");
+    shader_color_noise.load("shader/simple.vert", "shader/color_noise.frag");
     
     ofx::ObjLoader::load("model/hongo_studio_bad03.obj", objMesh);
 
@@ -22,6 +23,7 @@ void ofApp::setup(){
     vec_shader.push_back("simple");
     vec_shader.push_back("height");
     vec_shader.push_back("fake_noise");
+    vec_shader.push_back("color_noise");
     radio_shader = ui->addRadio("SHADER", vec_shader, OFX_UI_ORIENTATION_HORIZONTAL, OFX_UI_FONT_MEDIUM);
     radio_shader->activateToggle("simple");
     // ui slidebar
@@ -55,6 +57,7 @@ void ofApp::draw(){
     if(radio_shader->getActiveName()=="simple") shader = &shader_simple;
     else if(radio_shader->getActiveName()=="height") shader = &shader_height;
     else if(radio_shader->getActiveName()=="fake_noise") shader = &shader_fake_noise;
+    else if(radio_shader->getActiveName()=="color_noise") shader = &shader_color_noise;
     
     shader->begin();
     shader->setUniformMatrix4f("modelToWorld", modelToWorld);
