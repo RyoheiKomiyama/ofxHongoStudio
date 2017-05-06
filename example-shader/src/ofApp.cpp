@@ -2,6 +2,10 @@
 
 //--------------------------------------------------------------
 void ofApp::setup(){
+    
+    ofSetVerticalSync(false);
+    ofSetFrameRate(90);
+    
     shader_simple.load("shader/simple");
     shader_height.load("shader/height.vert", "shader/simple.frag");
     shader_fake_noise.load("shader/fake_noise.vert", "shader/simple.frag");
@@ -16,9 +20,9 @@ void ofApp::setup(){
     // UI
     ui = new ofxUISuperCanvas("SETTINGS");
     ui->setWidgetFontSize(ofxUIWidgetFontType::OFX_UI_FONT_MEDIUM);
-    ui->addSpacer();
     // ui shader
-    ui->addLabel("SHADER", OFX_UI_FONT_MEDIUM);
+    ui->addSpacer();
+    ui->addLabel("SHADERS", OFX_UI_FONT_MEDIUM);
     vector<string> vec_shader;
     vec_shader.push_back("simple");
     vec_shader.push_back("height");
@@ -27,8 +31,12 @@ void ofApp::setup(){
     radio_shader = ui->addRadio("SHADER", vec_shader, OFX_UI_ORIENTATION_HORIZONTAL, OFX_UI_FONT_MEDIUM);
     radio_shader->activateToggle("simple");
     // ui slidebar
-    ui->addSlider("Static CG", 0, 1, &alpha_staticCgScene);
-    ui->addSlider("Obj", 0, 1, &alpha_objMesh);
+    ui->addSpacer();
+    ui->addLabel("MODELS", OFX_UI_FONT_MEDIUM);
+    ui->addButton("Static CG", false);
+    ui->addSlider("Static CG", 0, 1, &alpha_staticCgScene)->setLabelVisible(false);
+    ui->addButton("Obj", false);
+    ui->addSlider("Obj", 0, 1, &alpha_objMesh)->setLabelVisible(false);
     ui->setColorBack(ofxUIColor(100, 100, 100, 128));
     ui->autoSizeToFitWidgets();
     ofAddListener(ui->newGUIEvent, this, &ofApp::guiEvent);
@@ -78,12 +86,27 @@ void ofApp::draw(){
     ofDisableDepthTest();
     ofDisableAlphaBlending();
     
+    ofDrawBitmapString("fps: " + ofToString(ofGetFrameRate()), 20, ofGetHeight()-20);
+    
 }
 
 //--------------------------------------------------------------
 void ofApp::guiEvent(ofxUIEventArgs &e) {
     string name = e.widget->getName();
     int kind = e.widget->getKind();
+    
+    if(kind == OFX_UI_WIDGET_BUTTON)
+    {
+        ofxUIButton *button = (ofxUIButton *) e.widget;
+        if(name=="Static CG" && button->getValue()==0){ // button released
+            alpha_staticCgScene = 1;
+            alpha_objMesh = 0;
+        }
+        else if(name=="Obj" && button->getValue()==0){ // button released
+            alpha_staticCgScene = 0;
+            alpha_objMesh = 1;
+        }
+    }
 }
 
 //--------------------------------------------------------------

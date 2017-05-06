@@ -15,7 +15,7 @@ class ofApp : public ofBaseApp{
     ofMatrix4x4 cameraToView;
     
     // SCENE
-    ofxHongoStudio::StaticCGScene staticCgScene; float alpha_staticCgScene;
+    ofxHongoStudio::StaticCGScene staticCgScene; float alpha_staticCgScene = 1;
     ofMesh objMesh; float alpha_objMesh;
     
     // UI
