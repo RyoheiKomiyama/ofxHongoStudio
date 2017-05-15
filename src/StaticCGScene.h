@@ -18,14 +18,13 @@ namespace ofxHongoStudio
         ofVec3f pos;
         
     public:
-        ColorBox(ofFloatColor color, ofVec3f pos) {
+        ColorBox(ofFloatColor color, ofVec3f pos, float box_size = 60 / SCALE) {
             
             // color, pos
             this->color = color;
             this->pos = pos;
             
             // vertices
-            float box_size = 60 / SCALE;
             vector<ofVec3f> vertices = {
                 ofVec3f(0, 0, 0)+pos,
                 ofVec3f(0, box_size, 0)+pos,

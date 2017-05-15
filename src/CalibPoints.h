@@ -12,31 +12,98 @@
 
 namespace ofxHongoStudio
 {
+	class CalibColorBox {
+
+		ofMesh mesh;
+		ofFloatColor color;
+		ofVec3f pos;
+
+	public:
+		CalibColorBox(ofFloatColor color, ofVec3f pos, float box_size = 5 / SCALE) {
+
+			// color, pos
+			this->color = color;
+			this->pos = pos;
+
+			// vertices
+			float half_box_size = box_size / 2;
+			vector<ofVec3f> vertices = {
+				ofVec3f(-half_box_size, -half_box_size, -half_box_size) + pos,
+				ofVec3f(-half_box_size, half_box_size, -half_box_size) + pos,
+				ofVec3f(half_box_size, half_box_size, -half_box_size) + pos,
+				ofVec3f(half_box_size, -half_box_size, -half_box_size) + pos,
+				ofVec3f(-half_box_size, -half_box_size, half_box_size) + pos,
+				ofVec3f(-half_box_size, half_box_size, half_box_size) + pos,
+				ofVec3f(half_box_size, half_box_size, half_box_size) + pos,
+				ofVec3f(half_box_size, -half_box_size, half_box_size) + pos
+			};
+			mesh.addVertices(vertices);
+
+			vector<ofFloatColor> colors;
+			for (int i = 0; i < vertices.size(); i++) {
+				colors.push_back(color);
+			}
+			mesh.addColors(colors);
+
+			// triangle
+			mesh.addTriangle(0, 1, 2);
+			mesh.addTriangle(0, 2, 3);
+			mesh.addTriangle(4, 5, 1);
+			mesh.addTriangle(4, 1, 0);
+			mesh.addTriangle(7, 6, 5);
+			mesh.addTriangle(7, 5, 4);
+			mesh.addTriangle(3, 2, 6);
+			mesh.addTriangle(3, 6, 7);
+			mesh.addTriangle(1, 5, 6);
+			mesh.addTriangle(1, 6, 2);
+			mesh.addTriangle(4, 0, 3);
+			mesh.addTriangle(4, 3, 7);
+		}
+
+		void update() {}
+
+		void draw() {
+			mesh.draw();
+		}
+
+		void drawWireFrame() {
+			mesh.drawWireframe();
+		}
+
+	};
+
+
+	static void drawAxis(float length = 12, float size = 2)
+	{
+		ofxHongoStudio::CalibColorBox(ofFloatColor(1, 1, 1, 1), ofVec3f(0, 0, 0) / SCALE, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(1, 0, 0, 1), ofVec3f(length, 0, 0) / SCALE, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(0, 1, 0, 1), ofVec3f(0, length, 0) / SCALE, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(0, 0, 1, 1), ofVec3f(0, 0, length) / SCALE, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(1, 0, 0, 1), ofVec3f(length, 0, 0) / SCALE / 2, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(0, 1, 0, 1), ofVec3f(0, length, 0) / SCALE / 2, size / SCALE).draw();
+		ofxHongoStudio::CalibColorBox(ofFloatColor(0, 0, 1, 1), ofVec3f(0, 0, length) / SCALE / 2, size / SCALE).draw();
+	}
+
+
     class CalibPoints{
     public:
         
         struct pointset{
-            pointset(ofVec3f v): world_point(v),
-            world_ori_y(ofVec3f(0, 0, 1)),
-            world_ori_z(ofVec3f(0, -1, 0)) {}
+            pointset(ofVec3f v): world_point(v){}
             ofVec3f world_point;
-            ofVec3f world_ori_y;
-            ofVec3f world_ori_z;
             ofVec3f vive_point;
-            ofVec3f vive_ori_y;
-            ofVec3f vive_ori_z;
-            ofVec3f rotvec;
-            float angle;
+			ofMatrix4x4 posemat;
             bool isFinished = false;
         };
         
         vector<pointset> pointsets;
         int target = 0;
-        ofMatrix4x4 calibmat;
+		ofMatrix4x4 calibmat_before;
+        ofMatrix4x4 calibmat_after;
         bool isCalibrated = false;
-        ofColor color = ofColor(127, 127, 127, 127);
-        ofColor finished_color = ofColor(0, 255, 0, 127);
-        ofColor target_color = ofColor(255, 0, 0, 127);
+        ofFloatColor color = ofFloatColor(0.5, 0.5, 0.5, 0.5);
+        ofFloatColor finished_color = ofFloatColor(0, 1, 0, 0.5);
+        ofFloatColor target_color = ofFloatColor(1, 0, 0, 0.5);
         
     public:
         CalibPoints() {
@@ -61,6 +128,13 @@ namespace ofxHongoStudio
                     pointsets.push_back(pointset(ofVec3f(-200 * (1 - i), 0, -100 * (2 - j))/SCALE));
                 }
             }
+
+			// calibmat_before
+			ofMatrix4x4 rx;
+			rx.makeRotationMatrix(90, 1, 0, 0);
+			ofMatrix4x4 ry;
+			ry.makeRotationMatrix(180, 0, 1, 0);
+			calibmat_before = rx * ry;
         }
         
         void update(){
@@ -70,7 +144,7 @@ namespace ofxHongoStudio
                     target_color = finished_color;
                 }
                 else{
-                    target_color = ofColor(255, 0, 0, 127);
+                    target_color = ofFloatColor(1, 0, 0, 0.5);
                 }
             }
             else if(t==1){
@@ -78,40 +152,33 @@ namespace ofxHongoStudio
             }
         }
         
-        void draw(){
+        void draw(ofShader& shader){
             for(int i=0; i<pointsets.size(); i++){
-                if(i!=target){
-                    ofPushStyle();
-                    if(pointsets[i].isFinished==true) ofSetColor(finished_color);
-                    else ofSetColor(color);
-                    ofDrawSphere(pointsets[i].world_point, 5/SCALE);
-                    ofPopStyle();
-                }
+				if (i != target) {
+					if (pointsets[i].isFinished == true) {
+						shader.setUniformMatrix4f("modelToWorld", ofMatrix4x4());
+						ofxHongoStudio::CalibColorBox(finished_color, pointsets[i].world_point).draw();
+					}
+					else {
+						shader.setUniformMatrix4f("modelToWorld", ofMatrix4x4());
+						ofxHongoStudio::CalibColorBox(color, pointsets[i].world_point).draw();
+					}
+				}
                 if(i==target){
-                    ofPushStyle();
-                    ofSetColor(target_color);
-                    ofDrawSphere(pointsets[i].world_point, 5/SCALE);
-                    ofPopStyle();
-                }
-                if (pointsets[i].isFinished == true) {
-                    ofPushMatrix();
-                    // usual
-                    if(!isCalibrated) ofScale(-1, 1, -1);
-                    ofTranslate(calibmat*pointsets[i].vive_point);
-                    ofRotate(pointsets[i].angle, pointsets[i].rotvec.x,
-                             pointsets[i].rotvec.y, pointsets[i].rotvec.z);
-                    ofDrawAxis(10/SCALE);
-                    ofPopMatrix();
+					shader.setUniformMatrix4f("modelToWorld", ofMatrix4x4());
+					ofxHongoStudio::CalibColorBox(target_color, pointsets[i].world_point).draw();
+				}
+                if (pointsets[i].isFinished == true) { //axis
+					shader.setUniformMatrix4f("modelToWorld", calibmat_before*pointsets[i].posemat*calibmat_after);
+					//shader.setUniformMatrix4f("modelToWorld", pointsets[i].posemat*calibmat_after);
+					ofxHongoStudio::drawAxis();
                 }
             }
         }
         
-        void setValue(ofVec3f pos, ofVec3f rotvec, float angle, ofVec3f ori_y, ofVec3f ori_z) {
+        void setValue(ofMatrix4x4 posemat, ofVec3f pos) {
+			pointsets[target].posemat = posemat;
             pointsets[target].vive_point = pos;
-            pointsets[target].vive_ori_y = ori_y;
-            pointsets[target].vive_ori_z = ori_z;
-            pointsets[target].rotvec = rotvec;
-            pointsets[target].angle = angle;
             pointsets[target].isFinished = true;
             calibrate();
             nextTarget();
@@ -127,9 +194,20 @@ namespace ofxHongoStudio
             vector<ofVec3f> ofVps; // vive points
             for (int i = 0; i < pointsets.size(); i++) {
                 if (pointsets[i].isFinished) {
+					// pos
                     ofWps.push_back(pointsets[i].world_point);
-                    ofVps.push_back(pointsets[i].vive_point);
-                }
+					ofVps.push_back((ofVec3f(0, 0, 0) / SCALE)*pointsets[i].posemat);
+                    //ofVps.push_back(pointsets[i].vive_point);
+					// x
+					ofWps.push_back(pointsets[i].world_point + (ofVec3f(1, 0, 0) / SCALE));
+					ofVps.push_back((ofVec3f(-1, 0, 0) / SCALE)*pointsets[i].posemat);
+					// y
+					ofWps.push_back(pointsets[i].world_point + (ofVec3f(0, 1, 0) / SCALE));
+					ofVps.push_back((ofVec3f(0, 1, 0) / SCALE)*pointsets[i].posemat);
+					// z
+					ofWps.push_back(pointsets[i].world_point + (ofVec3f(0, 0, 1) / SCALE));
+					ofVps.push_back((ofVec3f(0, 0, 1) / SCALE)*pointsets[i].posemat);
+				}
             }
             if (ofWps.size() < 6) return;
             isCalibrated = true;
@@ -153,11 +231,12 @@ namespace ofxHongoStudio
             cv::Mat VVtInv = VVt.inv();
             cv::Mat M = cv::Mat(4, 4, CV_32F);
             M = cvWpsMat*cvVpsMat_t*VVtInv;
+			M = M.t();
             ofMatrix4x4 m((float*)M.data);
-            calibmat = m;
+            calibmat_after = m;
             // save calibration matrix
             cv::FileStorage fs(ofToDataPath("")+"calibmat.yml", cv::FileStorage::WRITE);
-            fs << "calibmat" << M;
+            fs << "calibmat_after" << M;
             fs.release();
         }
     };
