@@ -104,6 +104,8 @@ namespace ofxHongoStudio
         ofFloatColor color = ofFloatColor(0.5, 0.5, 0.5, 0.5);
         ofFloatColor finished_color = ofFloatColor(0, 1, 0, 0.5);
         ofFloatColor target_color = ofFloatColor(1, 0, 0, 0.5);
+
+		string timestamp;
         
     public:
         CalibPoints() {
@@ -135,6 +137,22 @@ namespace ofxHongoStudio
 			ofMatrix4x4 ry;
 			ry.makeRotationMatrix(180, 0, 1, 0);
 			calibmat_before = rx * ry;
+
+			// load calibmat_after
+			cv::Mat M = cv::Mat(4, 4, CV_32F);
+			cv::FileStorage fs(ofToDataPath("") + "calibmat.yml", cv::FileStorage::READ);
+			if (fs.isOpened()) {
+				fs["calibmat_after"] >> M;
+				fs.release();
+				ofMatrix4x4 m((float*)M.data);
+				calibmat_after = m;
+			}
+			else {
+				cout << "couldn't load calibmat.yml" << endl;
+			}
+
+			// timestamp
+			timestamp = ofGetTimestampString();
         }
         
         void update(){
@@ -235,7 +253,7 @@ namespace ofxHongoStudio
             ofMatrix4x4 m((float*)M.data);
             calibmat_after = m;
             // save calibration matrix
-            cv::FileStorage fs(ofToDataPath("")+"calibmat.yml", cv::FileStorage::WRITE);
+            cv::FileStorage fs(ofToDataPath("")+"calibmat_" + timestamp + ".yml", cv::FileStorage::WRITE);
             fs << "calibmat_after" << M;
             fs.release();
         }
