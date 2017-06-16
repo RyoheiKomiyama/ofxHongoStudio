@@ -140,7 +140,7 @@ namespace ofxHongoStudio
 
 			// load calibmat_after
 			cv::Mat M = cv::Mat(4, 4, CV_32F);
-			cv::FileStorage fs(ofToDataPath("") + "calibmat.yml", cv::FileStorage::READ);
+			cv::FileStorage fs(ofToDataPath("") + "calibmat_after.yml", cv::FileStorage::READ);
 			if (fs.isOpened()) {
 				fs["calibmat_after"] >> M;
 				fs.release();

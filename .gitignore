@@ -7,6 +7,15 @@ bin/*.pdb
 obj/
 *db
 
+example-shader/bin/*.dll
+example-shader/bin/*.exe
+example-shader/bin/*.exp
+example-shader/bin/*.ilk
+example-shader/bin/*.lib
+example-shader/bin/*.pdb
+example-shader/obj/
+example-shader/*db
+
 Makefile
 Project.xcconfig
 *.app/
